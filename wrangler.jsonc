@@ -12,5 +12,12 @@
       "database_name": "drivechat",
       "database_id": "aa508b47-98bc-439f-8613-06e15e6c3228"
     }
-  ]
+  ],
+  // Add these as secrets using: wrangler secret put <NAME>
+  // Example: wrangler secret put GOOGLE_CLIENT_ID
+  // Example: wrangler secret put GOOGLE_CLIENT_SECRET
+  // Example: wrangler secret put SESSION_SECRET
+  "vars": {
+    "ALLOWED_DOMAIN": "yourdomain.com"
+  }
 }

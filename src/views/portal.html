@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Drive Search Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            margin-top: 40px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: inline-block;
+        }
+
+        .search-section {
+            padding: 40px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-btn, .logout-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .search-btn:hover, .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-btn:active, .logout-btn:active {
+            transform: translateY(0);
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .filter-group select, .filter-group input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .results-count {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .file-item {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .file-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .file-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: #666;
+            flex-wrap: wrap;
+        }
+
+        .file-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c33;
+        }
+
+        .login-section {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .login-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 30px;
+            background: white;
+            color: #333;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .login-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Google Drive Search Portal</h1>
+            <p>Search and find files across your Google Drive</p>
+            <div class="user-info hidden" id="userInfo">
+                <span id="userEmail"></span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div class="login-section" id="loginSection">
+            <h2 style="margin-bottom: 20px; color: #333;">Sign in with Google</h2>
+            <p style="margin-bottom: 30px; color: #666;">Access your organization's Google Drive files</p>
+            <button class="login-btn" onclick="login()">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Sign in with Google
+            </button>
+        </div>
+
+        <div class="search-section hidden" id="searchSection">
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search for files, folders, documents..." />
+                <button class="search-btn" onclick="search()">Search</button>
+            </div>
+
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="fileType">File Type</label>
+                    <select id="fileType">
+                        <option value="">All Types</option>
+                        <option value="application/vnd.google-apps.document">Google Docs</option>
+                        <option value="application/vnd.google-apps.spreadsheet">Google Sheets</option>
+                        <option value="application/vnd.google-apps.presentation">Google Slides</option>
+                        <option value="application/pdf">PDF</option>
+                        <option value="image/*">Images</option>
+                        <option value="video/*">Videos</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="modifiedTime">Modified</label>
+                    <select id="modifiedTime">
+                        <option value="">Any Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="owner">Owner</label>
+                    <input type="text" id="owner" placeholder="Owner email (optional)" />
+                </div>
+            </div>
+
+            <div id="resultsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        // Check authentication status on page load
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/status');
+                const data = await response.json();
+
+                if (data.authenticated) {
+                    currentUser = data.user;
+                    showSearchSection();
+                } else {
+                    showLoginSection();
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                showLoginSection();
+            }
+        }
+
+        function showLoginSection() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('searchSection').classList.add('hidden');
+            document.getElementById('userInfo').classList.add('hidden');
+        }
+
+        function showSearchSection() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('searchSection').classList.remove('hidden');
+            document.getElementById('userInfo').classList.remove('hidden');
+            document.getElementById('userEmail').textContent = currentUser.email;
+        }
+
+        function login() {
+            window.location.href = '/api/auth/google';
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                currentUser = null;
+                showLoginSection();
+                document.getElementById('resultsContainer').innerHTML = '';
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+
+        async function search() {
+            const query = document.getElementById('searchInput').value;
+            const fileType = document.getElementById('fileType').value;
+            const modifiedTime = document.getElementById('modifiedTime').value;
+            const owner = document.getElementById('owner').value;
+
+            if (!query.trim()) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.innerHTML = '<div class="loading"><div class="spinner"></div>Searching your Google Drive...</div>';
+
+            try {
+                const params = new URLSearchParams({
+                    q: query,
+                    ...(fileType && { type: fileType }),
+                    ...(modifiedTime && { modified: modifiedTime }),
+                    ...(owner && { owner: owner })
+                });
+
+                const response = await fetch(`/api/search?${params}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Search failed');
+                }
+
+                displayResults(data.files, query);
+            } catch (error) {
+                resultsContainer.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function displayResults(files, query) {
+            const resultsContainer = document.getElementById('resultsContainer');
+
+            if (!files || files.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="results">
+                        <div class="results-header">
+                            <div class="results-count">No results found for "${query}"</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const resultsHTML = `
+                <div class="results">
+                    <div class="results-header">
+                        <div class="results-count">${files.length} result${files.length !== 1 ? 's' : ''} found</div>
+                    </div>
+                    ${files.map(file => `
+                        <div class="file-item" onclick="openFile('${file.webViewLink}')">
+                            <div class="file-name">
+                                ${getFileIcon(file.mimeType)}
+                                ${file.name}
+                            </div>
+                            <div class="file-meta">
+                                <span>📁 ${file.mimeType.includes('folder') ? 'Folder' : getFileType(file.mimeType)}</span>
+                                <span>👤 ${file.owners ? file.owners[0].displayName : 'Unknown'}</span>
+                                <span>📅 ${new Date(file.modifiedTime).toLocaleDateString()}</span>
+                                ${file.size ? `<span>💾 ${formatFileSize(file.size)}</span>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            resultsContainer.innerHTML = resultsHTML;
+        }
+
+        function getFileIcon(mimeType) {
+            if (mimeType.includes('folder')) return '📁';
+            if (mimeType.includes('document')) return '📄';
+            if (mimeType.includes('spreadsheet')) return '📊';
+            if (mimeType.includes('presentation')) return '📽️';
+            if (mimeType.includes('pdf')) return '📕';
+            if (mimeType.includes('image')) return '🖼️';
+            if (mimeType.includes('video')) return '🎥';
+            if (mimeType.includes('audio')) return '🎵';
+            return '📎';
+        }
+
+        function getFileType(mimeType) {
+            if (mimeType.includes('document')) return 'Google Doc';
+            if (mimeType.includes('spreadsheet')) return 'Google Sheet';
+            if (mimeType.includes('presentation')) return 'Google Slides';
+            if (mimeType.includes('pdf')) return 'PDF';
+            if (mimeType.includes('image')) return 'Image';
+            if (mimeType.includes('video')) return 'Video';
+            if (mimeType.includes('audio')) return 'Audio';
+            return 'File';
+        }
+
+        function formatFileSize(bytes) {
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            if (bytes === 0) return '0 Bytes';
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function openFile(url) {
+            window.open(url, '_blank');
+        }
+
+        // Allow Enter key to trigger search
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        search();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

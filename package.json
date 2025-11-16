@@ -1,9 +1,9 @@
 {
   "name": "drivechat",
-  "description": "Complete backend API template using Hono + Chanfana + D1 + Vitest.",
+  "description": "Google Drive Search Portal - Private domain portal for searching Google Drive files.",
   "private": true,
   "cloudflare": {
-    "label": "Backend OpenAPI Template",
+    "label": "Google Drive Search Portal",
     "products": [
       "Workers",
       "D1"
@@ -11,7 +11,7 @@
     "categories": [
       "storage"
     ],
-    "docs_url": "https://chanfana.com",
+    "docs_url": "https://github.com/TeamRJEC/drivechat",
     "preview_icon_url": "https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/1b2805d9-e7fb-4576-5176-6b409e251800/public",
     "preview_image_url": "https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/cbde46cf-20fa-4548-7f70-1ae8c2f48900/preview",
     "publish": true
@@ -28,7 +28,8 @@
   "dependencies": {
     "chanfana": "2.8.1",
     "hono": "4.8.2",
-    "zod": "3.25.67"
+    "zod": "3.25.67",
+    "googleapis": "^144.0.0"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "0.8.44",

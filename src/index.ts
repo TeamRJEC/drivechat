@@ -1,50 +1,41 @@
-import { ApiException, fromHono } from "chanfana";
 import { Hono } from "hono";
-import { tasksRouter } from "./endpoints/tasks/router";
-import { ContentfulStatusCode } from "hono/utils/http-status";
-import { DummyEndpoint } from "./endpoints/dummyEndpoint";
+import { handleGoogleAuth, handleGoogleCallback, handleAuthStatus, handleLogout } from "./endpoints/auth";
+import { handleSearch, handleSearchHistory } from "./endpoints/search";
+import portalHTML from "./views/portal.html";
 
 // Start a Hono app
 const app = new Hono<{ Bindings: Env }>();
 
 app.onError((err, c) => {
-  if (err instanceof ApiException) {
-    // If it's a Chanfana ApiException, let Chanfana handle the response
-    return c.json(
-      { success: false, errors: err.buildResponse() },
-      err.status as ContentfulStatusCode,
-    );
-  }
-
-  console.error("Global error handler caught:", err); // Log the error if it's not known
-
-  // For other errors, return a generic 500 response
+  console.error("Global error handler caught:", err);
   return c.json(
     {
       success: false,
-      errors: [{ code: 7000, message: "Internal Server Error" }],
+      error: err.message || "Internal Server Error",
     },
     500,
   );
 });
 
-// Setup OpenAPI registry
-const openapi = fromHono(app, {
-  docs_url: "/",
-  schema: {
-    info: {
-      title: "My Awesome API",
-      version: "2.0.0",
-      description: "This is the documentation for my awesome API.",
-    },
-  },
+// Serve the web portal at root
+app.get("/", async (c) => {
+  return c.html(portalHTML);
 });
 
-// Register Tasks Sub router
-openapi.route("/tasks", tasksRouter);
+// Authentication routes
+app.get("/api/auth/google", handleGoogleAuth);
+app.get("/api/auth/callback", handleGoogleCallback);
+app.get("/api/auth/status", handleAuthStatus);
+app.post("/api/auth/logout", handleLogout);
 
-// Register other endpoints
-openapi.post("/dummy/:slug", DummyEndpoint);
+// Search routes
+app.get("/api/search", handleSearch);
+app.get("/api/search/history", handleSearchHistory);
+
+// Health check endpoint
+app.get("/health", (c) => {
+  return c.json({ status: "ok", service: "Google Drive Search Portal" });
+});
 
 // Export the Hono app
 export default app;
