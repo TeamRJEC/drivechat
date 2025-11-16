@@ -1,0 +1,16 @@
+{
+  "compatibility_date": "2025-10-08",
+  "main": "src/index.ts",
+  "name": "drivechat",
+  "upload_source_maps": true,
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "drivechat",
+      "database_id": "aa508b47-98bc-439f-8613-06e15e6c3228"
+    }
+  ]
+}
