@@ -1,6 +1,10 @@
 import { ApiException, fromHono } from "chanfana";
 import { Hono } from "hono";
 import { tasksRouter } from "./endpoints/tasks/router";
+import { accountRoutes } from "./endpoints/accounts/router";
+import { emailRoutes } from "./endpoints/emails/router";
+import { contactRoutes } from "./endpoints/contacts/router";
+import { calendarRoutes } from "./endpoints/calendar/router";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 import { DummyEndpoint } from "./endpoints/dummyEndpoint";
 
@@ -33,15 +37,21 @@ const openapi = fromHono(app, {
   docs_url: "/",
   schema: {
     info: {
-      title: "My Awesome API",
-      version: "2.0.0",
-      description: "This is the documentation for my awesome API.",
+      title: "DriveChat - Unified Communication Hub API",
+      version: "1.0.0",
+      description: "A unified inbox, contact management, and calendar synchronization API for serial entrepreneurs. Aggregates emails, contacts, and calendar events from multiple Google and Microsoft accounts.",
     },
   },
 });
 
 // Register Tasks Sub router
 openapi.route("/tasks", tasksRouter);
+
+// Register Communication Hub routes
+openapi.route("/", accountRoutes());
+openapi.route("/", emailRoutes());
+openapi.route("/", contactRoutes());
+openapi.route("/", calendarRoutes());
 
 // Register other endpoints
 openapi.post("/dummy/:slug", DummyEndpoint);
